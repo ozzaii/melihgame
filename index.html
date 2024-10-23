@@ -90,13 +90,25 @@
 
         #player {
             position: absolute;
-            bottom: 100px;
+            bottom: 150px;  // Moved up slightly
             left: 50%;
             transform: translateX(-50%);
-            font-size: 40px;
+            font-size: 60px;  // Increased size
             filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
             z-index: 10;
             transition: transform 0.1s linear;
+        }
+
+        #playerBubble {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            z-index: 9;
         }
 
         .stats {
@@ -219,6 +231,7 @@
 
         <div id="gameArea">
             <div id="player">🧚‍♂️</div>
+            <div id="playerBubble"></div>
         </div>
 
         <button id="special" class="btn special">
@@ -252,6 +265,9 @@
 
         // Falling items (mix of cute and naughty)
         const items = ['💕', '💖', '🍆', '💦', '🔥', '✨', '🚀', '👄'];
+
+        const player = document.getElementById('player');
+        const playerBubble = document.getElementById('playerBubble');
 
         function createSparkle(x, y) {
             const sparkle = document.createElement('div');
@@ -409,12 +425,13 @@
             const deltaX = currentX - lastX;
             const deltaY = currentY - playerY;
             
-            // Update player position
-            const playerRect = player.getBoundingClientRect();
-            const newX = Math.max(0, Math.min(window.innerWidth - playerRect.width, playerRect.left + deltaX));
-            const newY = Math.max(0, Math.min(window.innerHeight - playerRect.height, playerRect.top + deltaY));
+            // Update player and bubble position
+            const bubbleRect = playerBubble.getBoundingClientRect();
+            const newX = Math.max(0, Math.min(window.innerWidth - bubbleRect.width, bubbleRect.left + deltaX));
+            const newY = Math.max(0, Math.min(window.innerHeight - bubbleRect.height - 50, bubbleRect.top + deltaY));
             
-            player.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
+            playerBubble.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
+            player.style.transform = `translate3d(${newX}px, ${newY - 50}px, 0)`;  // Offset fairy above bubble
             
             // Update last known position
             lastX = currentX;
@@ -424,19 +441,19 @@
         function startGame() {
             gameActive = true;
             
-            // Set initial player position
-            const playerRect = player.getBoundingClientRect();
-            lastX = playerRect.left + playerRect.width / 2;
-            playerY = playerRect.top + playerRect.height / 2;
+            // Set initial player and bubble position
+            const bubbleRect = playerBubble.getBoundingClientRect();
+            lastX = bubbleRect.left + bubbleRect.width / 2;
+            playerY = bubbleRect.top + bubbleRect.height / 2;
             
             // Proper touch event handling
-            document.addEventListener('touchstart', (e) => {
+            playerBubble.addEventListener('touchstart', (e) => {
                 const touch = e.touches[0];
                 lastX = touch.clientX;
                 playerY = touch.clientY;
             }, { passive: false });
             
-            document.addEventListener('touchmove', handleTouch, { passive: false });
+            playerBubble.addEventListener('touchmove', handleTouch, { passive: false });
             
             // Create items and obstacles periodically
             setInterval(createItem, 800);
