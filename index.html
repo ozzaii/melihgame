@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🧚‍♂️ Melih's Magic 🧚‍♂️</title>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-confetti@2.12.0/tsparticles.confetti.bundle.min.js"></script>
+    <style>
+        * { user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(-45deg, #ff0066, #6600ff);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            color: white;
+            overflow: hidden;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+        }
+
+        #login {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .login-card {
+            width: 90%;
+            max-width: 320px;
+            padding: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(45deg, #ff0066, #ff4d94);
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+            filter: brightness(1.1);
+        }
+
+        #game {
+            display: none;
+            height: 100vh;
+            touch-action: none;
+        }
+
+        #player {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 40px;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+            z-index: 10;
+            transition: transform 0.1s linear;
+        }
+
+        .stats {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            padding: 15px;
+            z-index: 100;
+        }
+
+        .powerbar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .powerbar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff0066, #ff66b2);
+            transition: width 0.3s;
+        }
+
+        .item {
+            position: absolute;
+            font-size: 30px;
+            animation: float 3s infinite ease-in-out;
+            z-index: 5;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .message {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            background: white;
+            color: #ff0066;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            text-align: center;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .special {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            font-size: 18px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .special.ready {
+            opacity: 1;
+            pointer-events: auto;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .sparkle {
+            position: absolute;
+            pointer-events: none;
+            font-size: 20px;
+            animation: sparkle 1s ease-out forwards;
+        }
+
+        @keyframes sparkle {
+            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+            100% { transform: scale(2) rotate(360deg); opacity: 0; }
+        }
+
+        .obstacle {
+            position: absolute;
+            font-size: 30px;
+            animation: float 3s infinite ease-in-out;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login">
+        <div class="glass login-card">
+            <h2 style="text-align: center; margin-bottom: 20px;">✨ Melih'e Özel Magic Portal ✨</h2>
+            <form id="loginForm">
+                <input type="text" placeholder="Kullanıcı Adı" required>
+                <input type="password" placeholder="Şifre" required>
+                <button class="btn" style="margin-top: 20px;">Sihirli Aşka Giriş 🧚‍♂️</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game">
+        <div class="glass stats">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <div>Aşk: <span id="score">0</span> 💕</div>
+                <div>Sihir: <span id="power">0</span>% ✨</div>
+            </div>
+            <div class="powerbar">
+                <div class="powerbar-fill" id="powerBar"></div>
+            </div>
+        </div>
+
+        <div id="gameArea">
+            <div id="player">🧚‍♂️</div>
+        </div>
+
+        <button id="special" class="btn special">
+            SÜPER SIHIRLI SALDIRI! 🪄✨
+        </button>
+    </div>
+
+    <script>
+        let score = 0;
+        let power = 0;
+        let gameActive = false;
+        let specialReady = false;
+        let lastX = 0;
+        let playerY;
+        const obstacles = ['🌵', '🗿', '🌋', '🕳️'];
+        
+        // Super spicy messages (mixing love, explicit content, and humor)
+        const messages = [
+            { score: 10, text: "Digital Love'dan Dijital 69'a! 🤖" },
+            { score: 25, text: "Bu peri senin pipin için dans ediyor! 🧚‍♂️" },
+            { score: 50, text: "TAŞŞAKLARIN VENUS'TEN DAHA PARLAK! ✨" },
+            { score: 75, text: "Harder Better Faster = Senin Performansın! 😈" },
+            { score: 100, text: "ROBOT PENISINI EMMEK ISTIYORUM! 🤖" },
+            { score: 150, text: "O TAŞAKLARA PERI TOZU SERPEYIM! 🧚‍♂️" },
+            { score: 200, text: "FACE TO FACE? MORE LIKE SIT ON MY FACE! 👄" },
+            { score: 250, text: "PERİ TOZUYLA KAYGANLAŞTIRICI! 💦" },
+            { score: 300, text: "TECHNOLOGIC = PORNOGRAPHIC WITH YOU! 🔥" },
+            { score: 400, text: "TAŞŞAKLARINI EMCÜKLEYIP YALAYIM! 🤤" },
+            { score: 500, text: "GET LUCKY? DAHA ÇOOOK GET FUCKED! 😈" }
+        ];
+
+        // Falling items (mix of cute and naughty)
+        const items = ['💕', '💖', '🍆', '💦', '🔥', '✨', '🚀', '👄'];
+
+        function createSparkle(x, y) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            sparkle.textContent = '✨';
+            sparkle.style.left = x + 'px';
+            sparkle.style.top = y + 'px';
+            document.body.appendChild(sparkle);
+            setTimeout(() => sparkle.remove(), 1000);
+        }
+
+        function showMessage(text) {
+            const msg = document.createElement('div');
+            msg.className = 'message';
+            msg.textContent = text;
+            msg.style.top = '50%';
+            document.body.appendChild(msg);
+
+            requestAnimationFrame(() => {
+                msg.style.opacity = '1';
+                msg.style.transform = 'translateX(-50%) translateY(-50%)';
+            });
+
+            setTimeout(() => {
+                msg.style.opacity = '0';
+                setTimeout(() => msg.remove(), 300);
+            }, 2000);
+        }
+
+        function createItem() {
+            if (!gameActive) return;
+            
+            const item = document.createElement('div');
+            item.className = 'item';
+            item.textContent = items[Math.floor(Math.random() * items.length)];
+            item.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+            item.style.top = '-50px';
+            gameArea.appendChild(item);
+
+            let posY = -50;
+            const speed = 2 + Math.random() * 2;
+
+            function animate() {
+                if (!gameActive) return;
+                
+                posY += speed;
+                item.style.top = posY + 'px';
+
+                const itemRect = item.getBoundingClientRect();
+                const playerRect = player.getBoundingClientRect();
+
+                if (itemRect.bottom > playerRect.top && 
+                    itemRect.top < playerRect.bottom && 
+                    itemRect.right > playerRect.left && 
+                    itemRect.left < playerRect.right) {
+                    
+                    score += 1;
+                    power = Math.min(power + 5, 100);
+                    
+                    document.getElementById('score').textContent = score;
+                    document.getElementById('power').textContent = power;
+                    document.getElementById('powerBar').style.width = power + '%';
+                    
+                    createSparkle(itemRect.left, itemRect.top);
+                    
+                    if (power >= 100 && !specialReady) {
+                        specialReady = true;
+                        document.getElementById('special').classList.add('ready');
+                    }
+
+                    messages.forEach(msg => {
+                        if (score === msg.score) {
+                            showMessage(msg.text);
+                            confetti({
+                                particleCount: 100,
+                                spread: 70,
+                                origin: { y: 0.6 }
+                            });
+                        }
+                    });
+
+                    item.remove();
+                    return;
+                }
+
+                if (posY > window.innerHeight) {
+                    item.remove();
+                    return;
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        function createObstacle() {
+            if (!gameActive) return;
+            
+            const obstacle = document.createElement('div');
+            obstacle.className = 'obstacle';
+            obstacle.textContent = obstacles[Math.floor(Math.random() * obstacles.length)];
+            obstacle.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+            obstacle.style.top = '-50px';
+            gameArea.appendChild(obstacle);
+
+            let posY = -50;
+            const speed = 2 + Math.random() * 2;
+
+            function animate() {
+                if (!gameActive) return;
+                
+                posY += speed;
+                obstacle.style.top = posY + 'px';
+
+                const obstacleRect = obstacle.getBoundingClientRect();
+                const playerRect = player.getBoundingClientRect();
+
+                if (obstacleRect.bottom > playerRect.top && 
+                    obstacleRect.top < playerRect.bottom && 
+                    obstacleRect.right > playerRect.left && 
+                    obstacleRect.left < playerRect.right) {
+                    
+                    // Collision with obstacle
+                    score = Math.max(0, score - 5);
+                    power = Math.max(0, power - 10);
+                    
+                    document.getElementById('score').textContent = score;
+                    document.getElementById('power').textContent = power;
+                    document.getElementById('powerBar').style.width = power + '%';
+                    
+                    showMessage("Ouch! 😵");
+                    obstacle.remove();
+                    return;
+                }
+
+                if (posY > window.innerHeight) {
+                    obstacle.remove();
+                    return;
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const currentX = touch.clientX;
+            const currentY = touch.clientY;
+            
+            // Calculate the difference from the initial touch
+            const deltaX = currentX - lastX;
+            const deltaY = currentY - playerY;
+            
+            // Update player position
+            const playerRect = player.getBoundingClientRect();
+            const newX = Math.max(0, Math.min(window.innerWidth - playerRect.width, playerRect.left + deltaX));
+            const newY = Math.max(0, Math.min(window.innerHeight - playerRect.height, playerRect.top + deltaY));
+            
+            player.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
+            
+            // Update last known position
+            lastX = currentX;
+            playerY = currentY;
+        }
+
+        function startGame() {
+            gameActive = true;
+            
+            // Set initial player position
+            const playerRect = player.getBoundingClientRect();
+            lastX = playerRect.left + playerRect.width / 2;
+            playerY = playerRect.top + playerRect.height / 2;
+            
+            // Proper touch event handling
+            document.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                lastX = touch.clientX;
+                playerY = touch.clientY;
+            }, { passive: false });
+            
+            document.addEventListener('touchmove', handleTouch, { passive: false });
+            
+            // Create items and obstacles periodically
+            setInterval(createItem, 800);
+            setInterval(createObstacle, 2000);
+        }
+
+        document.getElementById('special').addEventListener('click', () => {
+            if (!specialReady) return;
+            
+            specialReady = false;
+            power = 0;
+            document.getElementById('power').textContent = power;
+            document.getElementById('powerBar').style.width = '0%';
+            document.getElementById('special').classList.remove('ready');
+
+            showMessage("SÜPER SIHIRLI TAŞAK SALDIRISI!!!! 🧚‍♂️✨");
+            
+            // Multiple confetti bursts
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    confetti({
+                        particleCount: 50,
+                        spread: 180,
+                        origin: { y: 0.6 }
+                    });
+                }, i * 200);
+            }
+
+            // Bonus points!
+            score += 50;
+            document.getElementById('score').textContent = score;
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const [username, password] = e.target.elements;
+            if (username.value === 'kocami' && password.value === 'seviyorum') {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('game').style.display = 'block';
+                startGame();
+            } else {
+                alert('Yanlış şifre aşkım! Tekrar dene 😘');
+            }
+        });
+    </script>
+</body>
+</html>
