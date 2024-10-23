@@ -229,17 +229,12 @@
             <div id="player">🧚‍♂️</div>
             <div id="playerBubble"></div>
         </div>
-
-        <button id="special" class="btn special">
-            SÜPER SIHIRLI SALDIRI! 🪄✨
-        </button>
     </div>
 
     <script>
         let score = 0;
         let power = 0;
         let gameActive = false;
-        let specialReady = false;
         let lastX = 0;
         let playerY;
         const obstacles = ['🌵', '🗿', '🌋', '🕳️'];
@@ -250,12 +245,11 @@
             { score: 10, text: "Bu peri senin pipin için dans ediyor! 🧚‍♂️" },
             { score: 20, text: "TAŞŞAKLARIN VENUS'TEN DAHA PARLAK! ✨" },
             { score: 30, text: "Harder Better Faster = Senin Performansın! 😈" },
-            { score: 40, text: "ROBOT PENISINI EMMEK ISTIYORUM! 🤖" },
-            { score: 50, text: "GET LUCKY? DAHA ÇOOOK GET FUCKED! 😈" }
+            { score: 40, text: "ROBOT PENISINI EMMEK ISTIYORUM! 🤖" }
         ];
 
-        // Falling items (mix of cute and naughty)
-        const items = ['💕', '💖', '🍆', '💦', '🔥', '✨', '🚀', '👄'];
+        // Final message
+        const finalMessage = { score: 50, text: "GET LUCKY? DAHA ÇOOOK GET FUCKED! 😈" };
 
         const player = document.getElementById('player');
         const playerBubble = document.getElementById('playerBubble');
@@ -328,12 +322,6 @@
                     
                     createSparkle(itemRect.left, itemRect.top);
                     
-                    if (power >= 100 && !specialReady) {
-                        console.log('Special attack ready');
-                        specialReady = true;
-                        document.getElementById('special').classList.add('ready');
-                    }
-
                     messages.forEach(msg => {
                         if (score === msg.score) {
                             showMessage(msg.text);
@@ -472,53 +460,13 @@
 
         function endGame() {
             gameActive = false;
-            showMessage("OYUN BİTTİ! SÜPER SIHIRLI AŞKIN KAZANDI! 🎉💖");
+            showMessage(finalMessage.text);
             confetti({
                 particleCount: 200,
                 spread: 180,
                 origin: { y: 0.6 }
             });
         }
-
-        document.getElementById('special').addEventListener('click', () => {
-            console.log('Button clicked');
-            console.log('specialReady:', specialReady);
-            console.log('power:', power);
-
-            if (!specialReady) {
-                console.log('Special attack not ready');
-                return;
-            }
-            
-            console.log('Activating special attack');
-            specialReady = false;
-            power = 0;
-            document.getElementById('power').textContent = power;
-            document.getElementById('powerBar').style.width = '0%';
-            document.getElementById('special').classList.remove('ready');
-
-            showMessage("SÜPER SIHIRLI TAŞAK SALDIRISI!!!! 🧚‍♂️✨");
-            
-            // Multiple confetti bursts
-            for (let i = 0; i < 10; i++) {
-                setTimeout(() => {
-                    confetti({
-                        particleCount: 50,
-                        spread: 180,
-                        origin: { y: 0.6 }
-                    });
-                }, i * 200);
-            }
-
-            // Bonus points!
-            score += 50;
-            document.getElementById('score').textContent = score;
-            console.log('Special attack completed. New score:', score);
-
-            if (score >= 50) {
-                endGame();
-            }
-        });
 
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
