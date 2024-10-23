@@ -251,12 +251,7 @@
             { score: 20, text: "TAŞŞAKLARIN VENUS'TEN DAHA PARLAK! ✨" },
             { score: 30, text: "Harder Better Faster = Senin Performansın! 😈" },
             { score: 40, text: "ROBOT PENISINI EMMEK ISTIYORUM! 🤖" },
-            { score: 50, text: "O TAŞAKLARA PERI TOZU SERPEYIM! 🧚‍♂️" },
-            { score: 60, text: "FACE TO FACE? MORE LIKE SIT ON MY FACE! 👄" },
-            { score: 70, text: "PERİ TOZUYLA KAYGANLAŞTIRICI! 💦" },
-            { score: 80, text: "TECHNOLOGIC = PORNOGRAPHIC WITH YOU! 🔥" },
-            { score: 90, text: "TAŞŞAKLARINI EMCÜKLEYIP YALAYIM! 🤤" },
-            { score: 100, text: "GET LUCKY? DAHA ÇOOOK GET FUCKED! 😈" }
+            { score: 50, text: "GET LUCKY? DAHA ÇOOOK GET FUCKED! 😈" }
         ];
 
         // Falling items (mix of cute and naughty)
@@ -351,6 +346,11 @@
                     });
 
                     item.remove();
+
+                    if (score >= 50) {
+                        endGame();
+                    }
+
                     return;
                 }
 
@@ -470,6 +470,16 @@
             setInterval(createObstacle, 2000);
         }
 
+        function endGame() {
+            gameActive = false;
+            showMessage("OYUN BİTTİ! SÜPER SIHIRLI AŞKIN KAZANDI! 🎉💖");
+            confetti({
+                particleCount: 200,
+                spread: 180,
+                origin: { y: 0.6 }
+            });
+        }
+
         document.getElementById('special').addEventListener('click', () => {
             console.log('Button clicked');
             console.log('specialReady:', specialReady);
@@ -504,6 +514,10 @@
             score += 50;
             document.getElementById('score').textContent = score;
             console.log('Special attack completed. New score:', score);
+
+            if (score >= 50) {
+                endGame();
+            }
         });
 
         document.getElementById('loginForm').addEventListener('submit', (e) => {
